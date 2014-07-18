@@ -1,198 +1,83 @@
-/**
- * Global Reset of all HTML Elements
- *
- * Resetting all of our HTML Elements ensures a smoother
- * visual transition between browsers. If you don't believe me,
- * try temporarily commenting out this block of code, then go
- * and look at Mozilla versus Safari, both good browsers with
- * a good implementation of CSS. The thing is, all browser CSS
- * defaults are different and at the end of the day if visual
- * consistency is what we're shooting for, then we need to
- * make sure we're resetting all spacing elements.
- *
- */
-html,
-body {
-  border: 0;
-  font-family: "Helvetica-Neue", "Helvetica", Arial, sans-serif;
-  line-height: 1.5;
-  margin: 0;
-  padding: 0;
-}
-div,
-span,
-object,
-iframe,
-img,
-table,
-caption,
-thead,
-tbody,
-tfoot,
-tr,
-tr,
-td,
-article,
-aside,
-canvas,
-details,
-figure,
-hgroup,
-menu,
-nav,
-footer,
-header,
-section,
-summary,
-mark,
-audio,
-video {
-  border: 0;
-  margin: 0;
-  padding: 0;
-}
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-blockquote,
-pre,
-a,
-abbr,
-address,
-cit,
-code,
-del,
-dfn,
-em,
-ins,
-q,
-samp,
-small,
-strong,
-sub,
-sup,
-b,
-i,
-hr,
-dl,
-dt,
-dd,
-ol,
-ul,
-li,
-fieldset,
-legend,
-label {
-  border: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  margin: 0;
-  padding: 0;
-}
-article,
-aside,
-canvas,
-figure,
-figure img,
-figcaption,
-hgroup,
-footer,
-header,
-nav,
-section,
-audio,
-video {
-  display: block;
-}
-table {
-  border-collapse: separate;
-  border-spacing: 0;
-}
-table caption,
-table th,
-table td {
-  text-align: left;
-  vertical-align: middle;
-}
-a img {
-  border: 0;
-}
-:focus {
-  outline: 0;
-}
-/* =============================================== */
-/* end reset */
-/* ================================================ */
-/* My vars */
-/* ================================================ */
-/* my Template/ Delete this when done */
-/* ================================================ */
-body {
-  background-color: #f2eeea;
-  font: normal small-caps normal 16px/1.4 "Helvetica-Neue";
+/* focus */
+/* footer */
+/* media Queries */
+html {
+  background-color: #d4d4d4;
 }
 nav {
-  background-color: #5f5e5d;
+  background-color: #333327;
+  height: 50px;
   width: 100%;
-  height: 50px;
 }
-nav h1 {
-  color: #e87162;
-  font-size: 2em;
-  line-height: 50px;
-  margin-left: 10px;
+nav img {
+  margin-top: 10px;
 }
-/* End Navigation */
-/* ================================================ */
-#submit_zip {
-  cursor: pointer;
-  float: left;
-  width: 70px;
-  margin-top: 14px;
-  margin-left: 10px;
-  background-color: #e24a37;
-  color: #666666;
-  height: 25px;
+.main_content {
+  height: 85vh;
+  background-color: #ffffff;
 }
-#submit_zip span {
-  margin-left: 10px;
-  float: left;
-  line-height: 25px;
-  text-align: center;
-  margin-top: 0px;
-  color: #fff;
-}
-.form_div {
-  float: left;
-}
-.search_section {
-  float: left;
+.main_content .feature_image {
   width: 100%;
-  height: 100px;
-  background-color: #fff;
+  height: 300px;
+  background: url(../media/images/feature_image.jpg) no-repeat center center;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
 }
-.template_div {
-  margin: 0 auto;
-  width: 300px;
-  height: 50px;
-  line-height: 50px;
-  color: #666666;
+.main_content .feature_body_text {
+  margin-top: 10px;
 }
-.template_div label {
-  font-size: 1.5 em;
+.areas_image {
+  margin-top: 20px;
+  margin-bottom: 50px;
 }
-.template_div input {
-  height: 25px;
-}
-.template_div h2 {
-  color: #e87162;
-  font-size: 2em;
-  text-align: center;
-  witdh: 100%;
-  height: 50px;
-  line-height: 50px;
+/*
+ ██████╗ ██╗   ██╗███████╗██████╗ ██╗███████╗███████╗
+██╔═══██╗██║   ██║██╔════╝██╔══██╗██║██╔════╝██╔════╝
+██║   ██║██║   ██║█████╗  ██████╔╝██║█████╗  ███████╗
+██║▄▄ ██║██║   ██║██╔══╝  ██╔══██╗██║██╔══╝  ╚════██║
+╚██████╔╝╚██████╔╝███████╗██║  ██║██║███████╗███████║
+ ╚══▀▀═╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝
+*/
+/* Small devices (tablets, 768px and up) */
+/* Medium devices (desktops, 992px and up) */
+/* Large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+  .main_content {
+    height: 85vh;
+  }
+  .main_content .feature_image {
+    height: 400px;
+    float: left;
+  }
+  .main_content .feature_body_text {
+    margin-top: 30px;
+  }
+  .areas_image {
+    margin-top: 20px;
+    margin-bottom: 50px;
+  }
+  .areas_of_focus {
+    background-color: #d4d4d4;
+  }
+  .areas_of_focus .focus_item {
+    position: relative;
+    top: -40px;
+  }
+  .areas_of_focus .focus_item_slider .slider_heading {
+    color: #ffffff;
+  }
+  footer {
+    background-color: #333327;
+    color: #676765;
+    height: 300px;
+    padding-top: 50px;
+  }
+  footer a:link {
+    color: #de5b21;
+  }
+  footer a:visited {
+    color: #de5b21;
+  }
 }
