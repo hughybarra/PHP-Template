@@ -1,9 +1,8 @@
-<?php 
-	// include 
+<?php
+	// include
 	// =============================
 	include "../models/view_model.php";
-	include "../models/search_zip.php";
-	// end includes 
+	// end includes
 	// =============================
 
 	// check for action in url
@@ -19,16 +18,5 @@
 		$view_model = new View_Model();
 		$view_model->get_view("../views/index.html");
 	}
-	// end home
-	// ==============================================
 
-	elseif( $action == "search_zip"){
-
-		// search zip to handle all zip related stuff
-		$search_zip = new Search_Zip(); 
-	}
-	// ==============================================
-	elseif( $action== ""){
-
-	}
 ?>
