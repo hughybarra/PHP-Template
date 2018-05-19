@@ -1,0 +1,12 @@
+/* css stored in: css/main.css */
+
+.loading_container{
+	height: 246px;
+}
+.success_container{
+	height: 246px;
+}
+
+.drag_hover{
+	background-color: black;
+}
