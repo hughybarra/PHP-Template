@@ -387,6 +387,8 @@
 				var post_data = {};
 				post_data.linked_fields = this.link_array;
 				post_data.server_file_path = this.server_file_path;
+				console.log('file name');
+				console.log(this.server_file_path);
 				// url path 
 				var url = 'csv_handler.php';
 			    // post the data to the server
