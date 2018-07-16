@@ -35,13 +35,26 @@ class Uploads{
 	    return $randomString;
 	}
 
+	/*
+	* unlink_file
+	* @param file_path String
+	* @param target_dir String
+	* unlinks a file from the uploads dir 
+	*/
+	public function unlink_file($file_path = null, $target_dir = null){
+		// check for file_path and target_dir
+		if($file_path && $target_dir){
+			// unlink the file 
+			unlink($target_dir.$file_path);
+		}
+	}// end unlink_file
 
 	/*
 	* store_linked_fields
 	* @param query_data array 
 	* attempts to store the fields in the database 
 	*/
-	public function store_linked_fields($query_data)
+	public function store_linked_fields($query_data, $file_name)
 	{
 		error_log("THIS SHOULD BE WORKING");
 
@@ -56,6 +69,10 @@ class Uploads{
 		// foreach($fl_ields as $key => $val){
 		// 	$s .= $key."='".$myArray['key'] // foreignSystemOrderID
 		// }
+
+
+		// remove the file from the system 
+		$this->unlink_file($file_name, '../uploads/');
 		// loop here 
 		ResponseHandler::json_response('Working', 200);
 
@@ -67,7 +84,7 @@ class Uploads{
 	* @param $linked_fields array
 	* loopsover the $csv_rows and attempts to grab the columns matched by the linked_fields array
 	*/
-	public function filter_linked_fields($csv_rows = null, $csv_first_row, $linked_fields = null )
+	public function filter_linked_fields($csv_rows = null, $csv_first_row, $linked_fields = null, $file_name = null )
 	{
 		// remove first index from csv rows 
 		unset($csv_rows[0]);
@@ -109,20 +126,23 @@ class Uploads{
 		}// nd $linked_fields as link 
 		unset($link);
 		unset($row);
+
+
+
 		// check if we have any errors
 		if($error_flag){
+			// remove the file from the system 
+			$this->unlink_file($file_name, '../uploads/');
 			// remove dupes 
 			$response_error_array = array_unique($errors_array);
 			ResponseHandler::json_response('Error: CSV fields cannot be empty', 400, $response_error_array);				
 		}else{
-			$this->store_linked_fields($query_data);
+			$this->store_linked_fields($query_data, $file_name);
 		}
 	}
 
 	public function load_linked_fields()
 	{
-
-
 		// check for file path && linked fields 
 		if($_POST['linked_fields'] && $_POST['server_file_path']){
 			$file_name = $_POST['server_file_path'];
@@ -146,9 +166,11 @@ class Uploads{
 				// push all the rows into the array 
 			    array_push($rows, $row);
 			}
-			$this->filter_linked_fields($rows, $first_line,  $_POST['linked_fields']);
+			$this->filter_linked_fields($rows, $first_line,  $_POST['linked_fields'], $file_name);
 
 		}else{
+			// remove the file from the system 
+			$this->unlink_file($_POST['server_file_path'], '../uploads/');
 			// fields missing from post return error
 			ResponseHandler::json_response('Error: Missing fields', 400);
 		}
@@ -187,6 +209,7 @@ class Uploads{
 			'fl_fields' => $fl_fields, 
 			'csv_file' => $csv_file,
 		);
+
 		ResponseHandler::json_response('Success: File Uploaded Successfully', 200, $responseObject);
 	}
 
