@@ -19,8 +19,8 @@
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 	    <a class="navbar-brand" href="#">ILF API Portal: KIIROO</a>
 	    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-	    <span class="navbar-toggler-icon"></span>
-	  </button>
+	    	<span class="navbar-toggler-icon"></span>
+	  	</button>
 
 	    <div class="collapse navbar-collapse" id="navbarSupportedContent">
 	        <ul class="navbar-nav mr-auto">
@@ -279,6 +279,64 @@
 									    <div class="card-body">
 									    	<div class="upload_contianer">
 
+									    		<!-- show the uploaded files -->
+									    		<div class="files_view_container">
+									    			<h2>Should see files here</h2>
+
+									    			<div class="card">
+									    				<div class="card-body">
+									    					
+
+										    			<div class="row">
+										    				
+
+										    				<div class="col-4">
+										    					<div class="card">
+										    						<div class="card-body">
+											    						<span class="file_size">2.9 <span class="size_type">KB</span></span>
+											    						<span class="file_name">file_name.csv</span>
+										    						</div>
+										    					</div>
+										    				</div>
+
+										    				<div class="col-4">
+										    					<div class="card">
+										    						<div class="card-body">
+											    						<span class="file_size">2.9 <span class="size_type">KB</span></span>
+											    						<span class="file_name">file_name.csv</span>
+										    						</div>
+										    					</div>
+										    				</div>
+
+										    				<div class="col-4">
+										    					<div class="card">
+										    						<div class="card-body">
+											    						<span class="file_size">2.9 <span class="size_type">KB</span></span>
+											    						<span class="file_name">file_name.csv</span>
+										    						</div>
+										    					</div>
+										    				</div>
+
+										    				<div class="col-4">
+										    					<div class="card">
+										    						<div class="card-body">
+											    						<span class="file_size">2.9 <span class="size_type">KB</span></span>
+											    						<span class="file_name">file_name.csv</span>
+										    						</div>
+										    					</div>
+										    				</div>
+
+										    				<!-- drop_csv_file_message -->
+										    				<span class="drop_csv_file_message">Drop CSV File Here</span>
+
+
+										    			</div><!-- end row -->
+									    					
+									    				</div>
+									    			</div>								
+									    		</div><!-- end files_view_container -->
+
+									    		<!-- original form -->
 										    	<form enctype="multipart/form-data" action="/?action=fallback_upload" method="POST">
 										    		<!-- csv upload -->
 										    		<div class="form-group">
@@ -295,7 +353,7 @@
 													<div class="error_container">
 														<p id="error_container" class="text-danger"></p>
 													</div>
-										    	</form>
+										    	</form><!-- end original form -->
 									    	</div><!-- form container -->
 									    </div><!-- end card-body -->
 									</div><!-- end card -->
