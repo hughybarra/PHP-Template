@@ -1,7 +1,6 @@
 /* js stored in js/csv_uplaod.js */
 
 (function($) {
-	var log = console.log;
 	var app = {
 		// local init vars 
 		app_state: 'widget_home',// defaults to widget home
@@ -11,15 +10,10 @@
 		card_widget_container: $('.card_widget_container'),
 		home_drop_zone: $('#drop_zone'),
 
-		files_array: [],
-		files_view_list: $('.files_view_list'),
-		files_submit_button: $('#files_submit_button'),
-
 		// error vars
 		server_error_message: $('#server_error_message'),
 		error_message: 'Soemthing Went Wrong Please Try Again Later',
 		error_event: '',
-
 
 		// matching vars
 		link_array: [],
@@ -41,7 +35,6 @@
 		* zeros out the widget 
 		*/
 		zero_out: function(ev){
-
 			// check for error_event 
 			if(this.error_event){
 				// set the event as the error event
@@ -49,7 +42,6 @@
 				// clearout the error_event
 				this.error_event = '';
 			}
-			this.files_array = [];
 			this.server_file_path = '';
 			this.link_array = [];
 			this.error_message = 'Soemthing Went Wrong Please Try Again Later';
@@ -120,84 +112,6 @@
 		},// end state_handler 
 
 		/*
-		* files_add_to_array
-		* @param array 
-		* appends the array to the files_view_array
-		*/
-		files_add_to_array: function(provided_array){
-			log('adding new files to file_view_array');
-
-			// loop over the provided array and add the files to the files_array
-			for(var x = 0; x < provided_array.length; x ++){
-				this.files_array.push(provided_array[x]);
-			}
-
-			// build the view now 
-			this.files_view_build();
-		}, // end files_view_add_to_array
-
-		/*
-		* files_remove_from_array 
-		*/
-		files_remove_from_array: function(event){
-			var match_index = event.target.getAttribute('remove_for')
-			// remove the matched index from the files aray 
-			this.files_array.splice(match_index,1);
-			// rebuild the view 
-			this.files_view_build();
-		},// end files_remove_from_array
-
-		/*
-		* get_file_size 
-		* @param size number
-		* determines the file size and returns a size in letters 
-		* example 2.47 KB
-		*/
-		get_file_size: function(size){
-		    var i = Math.floor( Math.log(size) / Math.log(1024) );
-		    return ( size / Math.pow(1024, i) ).toFixed(2) * 1 + ' ' + ['B', 'KB', 'MB', 'GB', 'TB'][i];
-		},
-		/*
-		* build_box 
-		* builds a file box to be rendered on the screen 
-		*/
-		build_box: function(file_data, index){
-			// build our injectable box 
-			var inject_box = 
-	    	'<div class="col-4" remove_for="'+index+'">'+
-				'<div class="card" remove_for="'+index+'" onclick="remove_file(event)">'+
-					'<div class="card-body" remove_for="'+index+'">'+
-						'<p class="file_size">'+this.get_file_size(file_data.size)+'</p>'+
-						'<p class="file_name">'+file_data.name+'</p>'+
-					'</div>'+
-				'</div>'+
-			'</div>';
-
-			// return injectable box 
-			return inject_box;
-		},// end build box 
-
-		/*
-		* files_view_build
-		* builds the files view container. 
-		* empties out the container 
-		* re appends the files to the container 
-		*/
-		files_view_build: function(){
-			log('building files view');
-
-			// empty out the container 
-			this.files_view_list.empty();
-
-			var files_array = this.files_array;
-			// loop over all of the files in the array and build the view 
-			for(var x = 0; x < files_array.length; x ++){
-				this.files_view_list.append(this.build_box(files_array[x], x));
-			}
-		},
-
-
-		/*
 		* home_drop_handler
 		* @param event
 		* when the user drops a file on the drophandler it will process that file 
@@ -209,13 +123,12 @@
 			this.home_drop_zone.removeClass('text-white bg-success');
 
 			// set state to loading 
-			// this.state_handler('widget_loading');
+			this.state_handler('widget_loading');
 
 			// Prevent default behavior (Prevent file from being opened)
 			event.preventDefault();
 			// create a array to store multiple files 
 			var filesArray = [];
-			log(event.dataTransfer);
 			// check if dropped files has items 
 			if (event.dataTransfer.items) {
 			    // Use DataTransferItemList interface to access the file(s)
@@ -243,39 +156,12 @@
 			        }
 			    }// end for 
 				// call upload_csv
-				// this.upload_csv(filesArray, event);
-
-
-				// get the file data from the file 
-
-				log('this is when i would call upload the csv');
-				log(filesArray);
-				// add the files to the files array 
-				this.files_add_to_array(filesArray);
+				this.upload_csv(filesArray, event);
 			}else{
 		    	//Something weng wrong
 		    	this.set_error('Soemthing went wrong', event);
 			}// end else
 		}, // end home_drop_handler
-
-		/*
-		* files_submit_buton_click_handler 
-		* when clicked checks to see if the user has any csv files selected.
-		* then attempts to upload them to the server 
-		*/
-		files_submit_button_click_handler: function(event){
-			// check to see that files exist 
-			if(this.files_array.length > 0){
-				log('we have files');
-				// attempt to upload the files 
-				// call upload_csv
-				this.upload_csv(this.files_array, event);
-			}else{
-				this.set_error('You need at least one file to upload', event);
-			}
-
-
-		}, // end files_submit_button_submit_handler 
 
 		/*
 		* home_dragover_handler
@@ -571,36 +457,17 @@
 		* attempts to upload the provided csv/csv's to the server
 		*/
 		upload_csv: function(fileArray, event){
-			log('uplaod_csv running');
-
-			log(fileArray);
-
 			var self = this;
-
 			// check for form data availability 
 			if(window.FormData === undefined){
 				// form data is not available so users wont be able to 
-				this.set_error('You need to use a different browser in order to uplaod a csv', event);
+				this.set_error('You need to use a different browser in order to uplaod a csv', ev);
 			}else{
 				// form data is available so we can upload
-				var url = 'csv_upload_handler.php';
-				// create new form data object
-			    var form_data = new FormData();
-
-
-			    // loop over our files array to appnd each file to the server 
-			    for(var x = 0; x < fileArray.length; x++){
-			    	form_data.append('csv_file_'+x, fileArray[x]);
-			    }
-
-			    // append our files to form data     
-			    // form_data.append('csv_files[]', fileArray);
-
-
-			    // formData.append('userpic[]', myFileInput.files[0], 'chris1.jpg');
-
-			    // ajax that shit 
-
+				// var url = '/?action=upload';
+				var url = 'csv_handler.php';
+			    var form_data = new FormData();    
+			    form_data.append('csv_file', fileArray[0]);
 			    // post the data to the server
 				$.ajax({
 				    url: url,
@@ -614,35 +481,32 @@
 			        data: form_data,                         
 			        type: 'post',
 				    success: function(resp){
-
-				    	log('success uplaoding ran');
-
 				    	// zero out 
-				    	// self.zero_out(event);
-					    // if(resp){
-					    // 	//check that we have a csv file in the response
-					    // 	// check that we have data in the response
-					    // 	if(resp.data.fl_fields && resp.data.user_fields && resp.data.csv_file){
-					    // 		//looks like we have all our data
+				    	self.zero_out(event);
+					    if(resp){
+					    	//check that we have a csv file in the response
+					    	// check that we have data in the response
+					    	if(resp.data.fl_fields && resp.data.user_fields && resp.data.csv_file){
+					    		//looks like we have all our data
 
-					    // 		// set the file name to the local var 
-					    // 		self.server_file_path = resp.data.csv_file;
-						   //  	// show the field matching section
-						   //  	self.init_widget_matching(resp.data);
+					    		// set the file name to the local var 
+					    		self.server_file_path = resp.data.csv_file;
+						    	// show the field matching section
+						    	self.init_widget_matching(resp.data);
 
-					    // 	}else{
-					    // 		// we were missing a few fields. Show this errro
-					    // 		self.set_error('Server response missing data. Please try again later', event);
-					    // 	}
+					    	}else{
+					    		// we were missing a few fields. Show this errro
+					    		self.set_error('Server response missing data. Please try again later', event);
+					    	}
 
-				    	// }else{
-				    	// 		self.set_error('Server error, Please try again later', event);
-				    	// }
+				    	}else{
+				    			self.set_error('Server error, Please try again later', event);
+				    	}
 
 
 				    },
 				    error: function(err, data) {
-				    	log('error uploading ran');
+
 				    	if(err){
 				    		self.set_error(err.responseJSON.message, event);
 				    	}else{
@@ -687,25 +551,6 @@
 	home_dragleave_handler = function(event){
 		app.home_dragleave_handler(event);
 	};// end home_dragleave_handler
-
-	/*
-	* files_submit_button_click_handler
-	* @param event 
-	* calls the app files_submit_button_click_handler
-	*/
-	files_submit_button_click_handler = function(event){
-		app.files_submit_button_click_handler(event);
-	};// end files_submit_button_click_handler
-
-
-	/*
-	* remove_file
-	* @param event 
-	* calls the app files_remove_from_arary 
-	*/
-	remove_file = function(event){
-		app.files_remove_from_array(event);
-	};// end remove_file
 	
 
 	// widget_success widget_error methods 

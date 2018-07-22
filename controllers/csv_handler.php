@@ -213,6 +213,7 @@ class Uploads{
 		ResponseHandler::json_response('Success: File Uploaded Successfully', 200, $responseObject);
 	}
 
+
 	/*
 	* store_csv
 	* @param csvFile, file 
@@ -226,27 +227,72 @@ class Uploads{
 	{
 		// check for existing files		
 		if($_FILES){
-			//check for csv fil type 
-			if($_FILES['csv_file']['type'] === 'text/csv'){
-				// generate our randome file name 
-				$randoString = $this->generateRandomString(24);
-				// set target directory upload 
-				$target_dir = "../uploads/";
-				$file_name = $randoString.'.csv';
-				// get file path/name
-				$target_file = $target_dir . $randoString.'.csv';
 
-				$fileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 
-			    if (move_uploaded_file($_FILES["csv_file"]["tmp_name"], $target_file)) {
-			    	$this->read_csv_file($target_file, $file_name);
-			        // now that we have saved the file lets process it 
-			    } else {
-			    	ResponseHandler::json_response('Error: Uploading file', 400);
-			    }				
-			}else{
-				ResponseHandler::json_response('Error: Invalid file type', 400);
-			}// end $_FILES['csv_file']['type']
+			// determine number of files in our upload 
+			$iter = sizeof($_FILES);
+			error_log('iter size: '.$iter);
+
+			$file_flag = 0;
+
+			// check for proper file types 
+			for($x = 0; $x < $iter; $x ++){
+				 // check for correct file types 
+				if($_FILES['csv_file_'.$x]['type'] != 'text/csv'){
+					error_log('incorrect file type');
+					$file_flag = 1;
+					break;	
+				}
+			}// end for loop 
+
+
+			// check our error flag for valid file types 
+			if($file_flag === 1){
+				// if error return the error 
+				error_log('return an error');
+				ResponseHandler::json_response('Error: Uploading file, Only CSV file type allowed', 400);
+				exit;
+			}
+
+			error_log('all good here');
+ 		
+			// LEFT OFF HERE 
+			// $file_array = array();
+ 		// 	// loop over all of the files 
+ 		// 	for($x = 0; $x < $iter; $x ++){
+ 		// 		$temp_array = array();
+			// 	// generate our randome file name 
+			// 	$randoString = $this->generateRandomString(24);
+			// 	// set target directory upload 
+			// 	$target_dir = "../uploads/";
+			// 	$file_name = $randoString.'.csv';
+			// 	// get file path/name
+			// 	$target_file = $target_dir . $randoString.'.csv';
+
+			// 	array_push($temp_array, $target_file)
+
+
+			// 	array_push($pila, "manzana", "arándano")
+
+ 		// 	}
+
+
+
+			// //check for csv fil type 
+			// if($_FILES['csv_file']['type'] === 'text/csv'){
+// /
+
+			// 	$fileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+
+			//     if (move_uploaded_file($_FILES["csv_file"]["tmp_name"], $target_file)) {
+			//     	$this->read_csv_file($target_file, $file_name);
+			//         // now that we have saved the file lets process it 
+			//     } else {
+			//     	ResponseHandler::json_response('Error: Uploading file', 400);
+			//     }				
+			// }else{
+			// 	ResponseHandler::json_response('Error: Invalid file type', 400);
+			// }// end $_FILES['csv_file']['type']
 		}else{
 			ResponseHandler::json_response('Error: Files missing in upload', 400);
 		}// end $_FILES			

@@ -71,7 +71,7 @@
 		    </nav>
 
 		    <!-- right side container -->
-		    <div class="col-10 row">
+		    <div class="col-12 row">
 		    	<!-- orders main overview -->
 			    <div class="col">
 
@@ -89,24 +89,22 @@
 			       		</div><!-- end card body -->
 			       	</div><!-- end overview_card -->
 
-
-
-
-
 			       	<!-- order entry uploads -->
 			       	<!-- show hide with upload order csv file -->
 			       	<div class="card">
 			       		<div class="card-header text-center">ORDER ENTRY UPLOADS</div>
 			       		<div class="btn btn-success">RETURN TO MAIN VIEW</div>
 			       	</div><!-- order_entry_uploads -->
-
-
-
-
 			    </div><!-- end orders main overview -->
 
+			    <style>
+			    	.tabs_container{
+			    		margin-top: 50px;
+			    		margin-bottom: 50px;
+			    	}
+			    </style>
 			    <!-- tabs container -->
-			    <div class="col-8">
+			    <div class="col-12 tabs_container">
 
 			    	<!-- tab navigation -->
 					<ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -256,6 +254,7 @@
 
 					    </div><!-- end CONTENT manual_order_entry_form -->
 
+
 					    <!-- CONTENT upload_order_csv_file -->
 					    <div class="tab-pane fade" id="upload_order_csv_file" role="tabpanel" aria-labelledby="upload_order_csv_file">
 					 
@@ -267,6 +266,21 @@
 						    		<img src="img/spinner1.gif" class="img-fluid" alt="Responsive image">
 						    		<p>Loading...</p>
 						    	</div><!-- end widget_loading -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 								<!-- widget_home -->
 								<div id="widget_home" class="">
@@ -281,83 +295,104 @@
 
 									    		<!-- show the uploaded files -->
 									    		<div class="files_view_container">
-									    			<h2>Should see files here</h2>
-
-									    			<div class="card">
+									   
+									    			<div class="card"
+								    				id="drop_zone" 
+								    				ondrop="home_drop_handler(event);" 
+								    				ondragover="home_dragover_handler(event);" 
+								    				ondragleave="home_dragleave_handler(event);" 
+									    			>
 									    				<div class="card-body">
-									    					
+											    			<div class="row files_view_list">
+											    				<!-- dynamic content here -->
 
-										    			<div class="row">
-										    				
+											    				<!-- example box -->
+											    				<!-- 
+											    	 			<div class="col-4" remove_for="index">
+																	<div class="card" remove_for="index" onclick="remove_file(event)">
+																		<div class="card-body" remove_for="index">
+																			<p class="file_size">123kB</p>
+																			<p class="file_name">name</p>
+																		</div>
+																	</div>
+																</div> 
+																-->
+																<!-- end example box --> 
+											    			</div><!-- end row -->
 
-										    				<div class="col-4">
-										    					<div class="card">
-										    						<div class="card-body">
-											    						<span class="file_size">2.9 <span class="size_type">KB</span></span>
-											    						<span class="file_name">file_name.csv</span>
-										    						</div>
-										    					</div>
-										    				</div>
-
-										    				<div class="col-4">
-										    					<div class="card">
-										    						<div class="card-body">
-											    						<span class="file_size">2.9 <span class="size_type">KB</span></span>
-											    						<span class="file_name">file_name.csv</span>
-										    						</div>
-										    					</div>
-										    				</div>
-
-										    				<div class="col-4">
-										    					<div class="card">
-										    						<div class="card-body">
-											    						<span class="file_size">2.9 <span class="size_type">KB</span></span>
-											    						<span class="file_name">file_name.csv</span>
-										    						</div>
-										    					</div>
-										    				</div>
-
-										    				<div class="col-4">
-										    					<div class="card">
-										    						<div class="card-body">
-											    						<span class="file_size">2.9 <span class="size_type">KB</span></span>
-											    						<span class="file_name">file_name.csv</span>
-										    						</div>
-										    					</div>
-										    				</div>
 
 										    				<!-- drop_csv_file_message -->
 										    				<span class="drop_csv_file_message">Drop CSV File Here</span>
+										    			
+									    				</div><!-- end card body -->
+									    			</div><!-- end card -->		
 
 
-										    			</div><!-- end row -->
-									    					
-									    				</div>
-									    			</div>								
+									    			<div id="files_submit_button" onclick="files_submit_button_click_handler(event)" class="btn btn-success">Submit Order</div>
+
 									    		</div><!-- end files_view_container -->
 
-									    		<!-- original form -->
-										    	<form enctype="multipart/form-data" action="/?action=fallback_upload" method="POST">
-										    		<!-- csv upload -->
-										    		<div class="form-group">
-										    			<label for="csv_upload">Click to Upload CSV</label>
-										    			<!-- only csv -->
-										    			<input class="form-control" type="file" name="csv_file" id="csv_file_input" accept=".csv">
-										    		</div><!-- end csv uplaod -->
 
-													<div id="drop_zone" ondrop="home_drop_handler(event);" ondragover="home_dragover_handler(event);" ondragleave="home_dragleave_handler(event);">
-													 	<p>Drop files here or click to upload</p>
-													  	<p>(Drop your CSV File here)</p>
-													</div>
+									    		<script>
 
-													<div class="error_container">
-														<p id="error_container" class="text-danger"></p>
-													</div>
-										    	</form><!-- end original form -->
+									    		//<!-- original form -->
+										    	//<form enctype="multipart/form-data" action="/?action=fallback_upload" method="POST">
+										    		//<!-- csv upload -->
+										    		//<div class="form-group">
+										    		//	<label for="csv_upload">Click to Upload CSV</label>
+										    		//	<!-- only csv -->
+										    		//	<input class="form-control" type="file" name="csv_file" id="csv_file_input" accept=".csv">
+										    		//</div><!-- end csv uplaod -->
+
+													//<div id="drop_zone" ondrop="home_drop_handler(event);" ondragover="home_dragover_handler(event);" ondragleave="home_dragleave_handler(event);">
+													 //	<p>Drop files here or click to upload</p>
+													 // 	<p>(Drop your CSV File here)</p>
+													//</div>
+
+													//<div class="error_container">
+													//	<p id="error_container" class="text-danger"></p>
+													//</div>
+										    	//</form><!-- end original form -->
+										    </script>
 									    	</div><!-- form container -->
 									    </div><!-- end card-body -->
 									</div><!-- end card -->
 								</div><!-- home -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 								<!-- widget_success -->
 								<div id="widget_success" class="">
