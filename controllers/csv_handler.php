@@ -176,42 +176,110 @@ class Uploads{
 		}
 	}
 
+
+	/*
+	* read_csv_files
+	* @param $file_array array 
+	* loops over the files in the file array 
+	* extracts the first line of each file
+	* stores the line data, and csv file into an object
+	* for each file an object is created
+	* creates a required fields array 
+	* returns an object with required fields, and an object of lines for each file 
+	*/
+	public function read_csv_files($file_array = array())
+	{
+		// check that our files array exists
+		if($file_array){
+			// get the size of our array 
+			$iter = sizeof($file_array);
+			// create empty array 
+			$file_lines_array = array();
+
+			// loop over all of our files 
+			for($x = 0; $x < $iter; $x ++){
+				// attempt to open the file at this iter 
+				$f = fopen($file_array[$x]['target_file'], 'r');
+				$line = fgets($f);
+				fclose($f);
+				// push lines into an array 
+				$lines = explode(',', $line);
+
+				$csv_file = $file_array[$x]['file_name'];
+
+				$temp_array = array(
+					'csv_file' => $csv_file, 
+					'lines' => $lines, 
+				);
+				array_push($file_lines_array, $temp_array);
+			}// end for loop 
+
+
+			// finished exploding the lines out of each file 
+
+			// list of required fields for the system 
+			$fl_fields = array(
+				'intOrder_AffID', 
+				'strCust_ShippingCompany',
+				'strCust_ShippingFirstName',
+				// 'strCust_ShippingLastName',
+				// 'strCust_ShippingAddress1',
+				// 'strCust_ShippingAddress2',
+				// 'strCust_ShippingCity',
+				// 'strCust_ShippingState',
+				// 'strCust_ShippingZip',
+				// 'strCust_ShippingCountry',
+				// 'strCust_ShippingPhone',
+				// 'foreignSystemOrderID',
+			);
+			// create our response object 
+			$response_array = array(
+				'user_fields' => $file_lines_array, 
+				'fl_fields' => $fl_fields,
+			);
+			ResponseHandler::json_response('Success: File/Files Uploaded Successfully', 200, $response_array);
+		}else{
+			error_log('missing file array');
+			ResponseHandler::json_response('Server Error: Missing File Array', 400);
+		}
+	}// end read_csv_files
+
 	/*
 	* read_csv_file
 	*/
-	public function read_csv_file($filePath = '', $fileName = ''){
+	// public function read_csv_file($filePath = '', $fileName = ''){
 
-		// open our csv andparse the first line
-		$f = fopen($filePath, 'r');
-		$line = fgets($f);
-		fclose($f);
-		//push the lines into an array
-		$lines = explode(",", $line);
+	// 	// open our csv andparse the first line
+	// 	$f = fopen($filePath, 'r');
+	// 	$line = fgets($f);
+	// 	fclose($f);
+	// 	//push the lines into an array
+	// 	$lines = explode(",", $line);
 
-		$user_fields = $lines;
-		$csv_file = $fileName;
-		$fl_fields = array(
-			'intOrder_AffID', 
-			'strCust_ShippingCompany',
-			'strCust_ShippingFirstName',
-			// 'strCust_ShippingLastName',
-			// 'strCust_ShippingAddress1',
-			// 'strCust_ShippingAddress2',
-			// 'strCust_ShippingCity',
-			// 'strCust_ShippingState',
-			// 'strCust_ShippingZip',
-			// 'strCust_ShippingCountry',
-			// 'strCust_ShippingPhone',
-			// 'foreignSystemOrderID',
-		);
-		$responseObject = array(
-			'user_fields' => $user_fields,
-			'fl_fields' => $fl_fields, 
-			'csv_file' => $csv_file,
-		);
+	// 	$user_fields = $lines;
+	// 	$csv_file = $fileName;
+	// 	$fl_fields = array(
+	// 		'intOrder_AffID', 
+	// 		'strCust_ShippingCompany',
+	// 		'strCust_ShippingFirstName',
+	// 		// 'strCust_ShippingLastName',
+	// 		// 'strCust_ShippingAddress1',
+	// 		// 'strCust_ShippingAddress2',
+	// 		// 'strCust_ShippingCity',
+	// 		// 'strCust_ShippingState',
+	// 		// 'strCust_ShippingZip',
+	// 		// 'strCust_ShippingCountry',
+	// 		// 'strCust_ShippingPhone',
+	// 		// 'foreignSystemOrderID',
+	// 	);
+	// 	$responseObject = array(
+	// 		'user_fields' => $user_fields,
+	// 		'fl_fields' => $fl_fields, 
+	// 		'csv_file' => $csv_file,
+	// 	);
 
-		ResponseHandler::json_response('Success: File Uploaded Successfully', 200, $responseObject);
-	}
+	// 	ResponseHandler::json_response('Success: File Uploaded Successfully', 200, $responseObject);
+	// }
 
 
 	/*
@@ -227,7 +295,6 @@ class Uploads{
 	{
 		// check for existing files		
 		if($_FILES){
-
 
 			// determine number of files in our upload 
 			$iter = sizeof($_FILES);
@@ -257,25 +324,40 @@ class Uploads{
 			error_log('all good here');
  		
 			// LEFT OFF HERE 
-			// $file_array = array();
- 		// 	// loop over all of the files 
- 		// 	for($x = 0; $x < $iter; $x ++){
- 		// 		$temp_array = array();
-			// 	// generate our randome file name 
-			// 	$randoString = $this->generateRandomString(24);
-			// 	// set target directory upload 
-			// 	$target_dir = "../uploads/";
-			// 	$file_name = $randoString.'.csv';
-			// 	// get file path/name
-			// 	$target_file = $target_dir . $randoString.'.csv';
+			$file_array = array();
+ 			// loop over all of the files 
+ 			for($x = 0; $x < $iter; $x ++){
+				// generate our randome file name 
+				$randoString = $this->generateRandomString(24);
+				// set target directory upload 
+				$target_dir = "../uploads/";
+				$file_name = $randoString.'.csv';
+				// get file path/name
+				$target_file = $target_dir . $randoString.'.csv';
 
-			// 	array_push($temp_array, $target_file)
+				$temp_array = array(
+					'target_file' => $target_file, 
+					'file_name' => $file_name,
+				);
+
+				array_push($file_array, $temp_array);
+
+				if(move_uploaded_file($_FILES['csv_file_'.$x]["tmp_name"], $target_file)) {
+					error_log('everything worked');
+				}else{
+					error_log('something went wrong');
+					ResponseHandler::json_response('Error: Uploading file', 400);
+				}
+ 			}// end for loop 
+
+ 			error_log('finished looping');
+ 			error_log(print_r($file_array, TRUE));
+
+ 			// now that we have our files uploaded lets call the parser
+ 			$this->read_csv_files($file_array);
 
 
-			// 	array_push($pila, "manzana", "arándano")
-
- 		// 	}
-
+ 			// 'csv_file_'+x
 
 
 			// //check for csv fil type 

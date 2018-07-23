@@ -23,7 +23,7 @@
 
 		// matching vars
 		link_array: [],
-		server_file_path: '',
+		// server_file_path: '',
 
 		/* 
 		* init 
@@ -50,12 +50,13 @@
 				this.error_event = '';
 			}
 			this.files_array = [];
-			this.server_file_path = '';
+			this.files_view_list.empty();
+			// this.server_file_path = '';
 			this.link_array = [];
 			this.error_message = 'Soemthing Went Wrong Please Try Again Later';
 			this.app_state = 'widget_home';
 			// zero out the server file path 
-			this.server_file_path = '';
+			// this.server_file_path = '';
 			// remove children from zero out
 			$('#fl_fields_container').empty();
 			// remove children from error container 
@@ -370,8 +371,8 @@
 		* @param String fieldname
 		* builds a user field and returns the li 
 		*/
-		build_user_field_li: function(field_name){
-			var newLi = '<li id="'+field_name+'" class="list-group-item" draggable="true" ondragstart="matching_field_drag(event)">'+ field_name+'</li>';
+		build_user_field_li: function(field_name, file_name){
+			var newLi = '<li id="'+field_name+'" filename="'+file_name.csv_file+'" class="list-group-item" draggable="true" ondragstart="matching_field_drag(event)">'+ field_name+'</li>';
 			return newLi;
 		},// end build_user_field_li
 
@@ -434,11 +435,12 @@
 		* @param user_field
 		* matches a fl_field to a user_field in the associative array 
 		*/
-		create_link: function(fl_field, user_field){
+		create_link: function(fl_field, user_field, file_name){
 			// create new object and assign vals
 			var obj = {};
 			obj.fl_field = fl_field;
 			obj.user_field = user_field;
+			obj.file_name = file_name;
 			// push our new link object into the links array 
 			this.link_array.push(obj);	
 		},// end create_link 
@@ -449,7 +451,10 @@
 		* sets the data transfer data for the drag event
 		*/
 		matching_field_drag: function(event){
+			// pass the text to the drag event 
 			event.dataTransfer.setData("text", event.target.id);
+			// pass the file name to the drag  event 
+			event.dataTransfer.setData('file_name', event.target.getAttribute('filename'));
 		},// end matching_field_drag
 
 
@@ -461,12 +466,13 @@
 		matching_drop: function(event){
 			// prevent default functionality 
 		    event.preventDefault();
+		    // grab the text out of the file name 
 		    var data = event.dataTransfer.getData("text");
+		    // get our file name out of the event 
+		    var file_name = event.dataTransfer.getData('file_name');
 		    //dynamically set html of continer 
 		    $('#'+event.target.id).text(data);
-
-		    this.create_link(event.target.getAttribute('field_name'), data);
-		   
+		    this.create_link(event.target.getAttribute('field_name'), data, file_name);
 		},// end matching_drop
 
 		/*
@@ -494,16 +500,18 @@
 				return;
 			}
 
-			if(this.link_array && this.server_file_path){
+			// check that we have linked items 
+			if(this.link_array){
+				// create our post data 
+
 				this.state_handler('widget_loading');
 				// create our post data
 				var post_data = {};
 				post_data.linked_fields = this.link_array;
-				post_data.server_file_path = this.server_file_path;
-				console.log('file name');
-				console.log(this.server_file_path);
+
+
 				// url path 
-				var url = 'csv_handler.php';
+				var url = 'process_linked_fields.php';
 			    // post the data to the server
 				$.ajax({
 				    url: url,
@@ -530,7 +538,46 @@
 
 				    }
 				});// end ajax 
+
 			}
+
+			// if(this.link_array && this.server_file_path){
+				// this.state_handler('widget_loading');
+				// // create our post data
+				// var post_data = {};
+				// post_data.linked_fields = this.link_array;
+				// post_data.server_file_path = this.server_file_path;
+			// 	console.log('file name');
+			// 	console.log(this.server_file_path);
+				// // url path 
+				// var url = 'csv_handler.php';
+			 //    // post the data to the server
+				// $.ajax({
+				//     url: url,
+			 //       	dataType: 'json',  // what to expect back from the PHP script, if anything
+			 //       	type: "POST",
+			 //        data: post_data,                         
+			 //        // type: 'post',
+				//     success: function(resp){
+				//     	// set event for future zeroout
+				//     	self.error_event = event;
+				//     	self.state_handler('widget_success');
+				//     },
+				//     error: function(err, data) {
+				//     	// check for json response
+				//     	if(err.responseJSON){
+				//     		// check fordata in json
+				//     		if(err.responseJSON.data){
+				//     			self.set_error(err.responseJSON.message, event, err.responseJSON.data);
+				//     		}
+				//     		self.set_error(err.responseJSON.message, event);
+				//     	}else{
+				//     		self.set_error('Server error please try again later', event);
+				//     	}
+
+				//     }
+				// });// end ajax 
+			// }
 		},//end submit_linked_fields
 
 		/*
@@ -542,19 +589,28 @@
 	    	// set the stateto widget matching
 	    	this.state_handler('widget_matching');
 
-			// loop over usr fields 
-			for(var x = 0; x < data.user_fields.length; x ++){
-				$('#user_fields_container').append(this.build_user_field_li(data.user_fields[x]));
-			}
+
+	    	// loop over the file fields
+	    	for(var x = 0; x < data.user_fields.length; x ++){
+	    		// loop over the lines 
+	    		for(var y = 0; y < data.user_fields[x].lines.length; y ++){
+	    			$('#user_fields_container').append(this.build_user_field_li(data.user_fields[x].lines[y], data.user_fields[x]));
+	    		}
+	    	}
+
+			// // loop over usr fields 
+			// for(var x = 0; x < data.user_fields.length; x ++){
+			// 	$('#user_fields_container').append(this.build_user_field_li(data.user_fields[x]));
+			// }
 
 
 			// // loop over fl fields 
 			for(var y = 0; y < data.fl_fields.length; y ++){
-				var obj = {};
-				obj.fl_field = data.fl_fields[y];
-				obj.user_field = undefined;
-				// push item into array 
-				// this.link_array.push(obj);
+				// var obj = {};
+				// obj.fl_field = data.fl_fields[y];
+				// obj.user_field = undefined;
+				// // push item into array 
+				// // this.link_array.push(obj);
 
 				// create li element and append
 				$('#fl_fields_container').append(this.build_fl_fields(data.fl_fields[y]));
@@ -617,32 +673,37 @@
 
 				    	log('success uplaoding ran');
 
+				    	log(resp);
 				    	// zero out 
-				    	// self.zero_out(event);
-					    // if(resp){
-					    // 	//check that we have a csv file in the response
-					    // 	// check that we have data in the response
-					    // 	if(resp.data.fl_fields && resp.data.user_fields && resp.data.csv_file){
-					    // 		//looks like we have all our data
+				    	self.zero_out(event);
+					    if(resp){
+					    	//check that we have a csv file in the response
+					    	// check that we have data in the response
+					    	if(resp.data.fl_fields && resp.data.user_fields){
+					    		//looks like we have all our data
 
-					    // 		// set the file name to the local var 
-					    // 		self.server_file_path = resp.data.csv_file;
-						   //  	// show the field matching section
-						   //  	self.init_widget_matching(resp.data);
+					    		// // set the file name to the local var 
+					    		// self.server_file_path = resp.data.csv_file;
+						    	// show the field matching section
+						    	self.init_widget_matching(resp.data);
 
-					    // 	}else{
-					    // 		// we were missing a few fields. Show this errro
-					    // 		self.set_error('Server response missing data. Please try again later', event);
-					    // 	}
+					    	}else{
+					    		// we were missing a few fields. Show this errro
+					    		self.set_error('Server response missing data. Please try again later', event);
+					    	}
 
-				    	// }else{
-				    	// 		self.set_error('Server error, Please try again later', event);
-				    	// }
+				    	}else{
+				    			self.set_error('Server error, Please try again later', event);
+				    	}
 
 
 				    },
 				    error: function(err, data) {
 				    	log('error uploading ran');
+
+				    	//zero out 
+				    	self.zero_out(event);
+
 				    	if(err){
 				    		self.set_error(err.responseJSON.message, event);
 				    	}else{
