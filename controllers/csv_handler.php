@@ -47,6 +47,7 @@ class Uploads{
 			// unlink the file 
 			unlink($target_dir.$file_path);
 		}
+
 	}// end unlink_file
 
 	/*
@@ -131,50 +132,212 @@ class Uploads{
 
 		// check if we have any errors
 		if($error_flag){
-			// remove the file from the system 
-			$this->unlink_file($file_name, '../uploads/');
-			// remove dupes 
-			$response_error_array = array_unique($errors_array);
-			ResponseHandler::json_response('Error: CSV fields cannot be empty', 400, $response_error_array);				
+			return $query_data;
+			// // remove the file from the system 
+			// $this->unlink_file($file_name, '../uploads/');
+			// // remove dupes 
+			// $response_error_array = array_unique($errors_array);
+			// ResponseHandler::json_response('Error: CSV fields cannot be empty', 400, $response_error_array);				
 		}else{
-			$this->store_linked_fields($query_data, $file_name);
+			error_log('error looping over row stuff');
+			return false;
+			// $this->store_linked_fields($query_data, $file_name);
 		}
 	}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*
+	* load_linked_fields
+	* 
+	* check for the file path in the linked fields 
+	* Check that linked fields exist in POST 
+	* 
+	* loop over each of the files and open the linked field file 
+	* loop through csv rows 
+	*/
 	public function load_linked_fields()
 	{
-		// check for file path && linked fields 
-		if($_POST['linked_fields'] && $_POST['server_file_path']){
-			$file_name = $_POST['server_file_path'];
-			$target_dir = "../uploads/";
-			$file_path = $target_dir.$file_name;
-			//Open the file.
-			$fileHandle = fopen($file_path, "r");
+
+		/*
+		* fl field 
+		* user field 
+		* file field 
+		*/
+
+		// check for files 
+		if($_POST['linked_fields']){
+			// we have linked fields 
+			error_log('we got linked fields');
+
+			// loop over all of our linked fields 
+			// determine number of files in our upload 
+			$iter = sizeof($_POST['linked_fields']);
 
 
-			// open our csv andparse the first line
-			$f = fopen($file_path, 'r');
-			$line = fgets($f);
-			fclose($f);
-			//push the lines into an array
-			$first_line = explode(",", $line);
+			error_log(print_r($_POST['linked_fields'], TRUE));
+
+			$missing_error = false;
+
+			$file_rows = array();
+
+			// check for proper file types 
+			for($x = 0; $x < $iter; $x ++){
 
 
-			$rows = array();
-			//Loop through the CSV rows.
-			while (($row = fgetcsv($fileHandle, 0, ",")) !== FALSE) {
-				// push all the rows into the array 
-			    array_push($rows, $row);
+
+				error_log('looping');
+
+
+				error_log(print_r($_POST['linked_fields'][$x]['fl_field'], TRUE));
+
+				$missing_fields = false;
+
+				// check for fl field
+				if (isset($_POST['linked_fields'][$x]['fl_field'])) {
+
+				    $fl_field = $_POST['linked_fields'][$x]['fl_field'];
+				}else{
+					error_log('fl field');
+					$missing_fields = true; 
+				}
+
+				// check for user field 
+
+				// check for user_field 
+				if( isset($_POST['linked_fields'][$x]['user_field'])){
+					$user_field = $_POST['linked_fields'][$x]['user_field'];
+				}else{
+					error_log('user field');
+					$missing_fields = true; 
+				}
+
+				// check for file field 
+				if(isset($_POST['linked_fields'][$x]['file_name'])){
+					$file_name = $_POST['linked_fields'][$x]['file_name'];
+				}else{
+					error_log('file name');
+					$missing_fields = true; 
+				}
+
+
+
+				if($missing_fields){
+					error_log('missing fields kick back an error');
+					$missing_error = true;
+					break; 	
+				}
+
+				// make sure we are not missing any data
+				if(!$missing_error){
+					// set the target dir 
+					$target_dir = "../uploads/";
+					$file_path = $target_dir.$file_name;
+					//Open the file.
+					$fileHandle = fopen($file_path, "r");
+
+
+					// open our csv andparse the first line
+					$f = fopen($file_path, 'r');
+					$line = fgets($f);
+					fclose($f);
+					//push the lines into an array
+					$first_line = explode(",", $line);
+
+					$rows = array();
+					//Loop through the CSV rows.
+					while (($row = fgetcsv($fileHandle, 0, ",")) !== FALSE) {
+						// push all the rows into the array 
+					    array_push($rows, $row);
+					}
+					// push rows into our file_rows array 
+					array_push($file_rows, $rows);
+
+					$end_data = $this->filter_linked_fields($rows, $first_line,  $_POST['linked_fields'], $file_name);
+
+					error_log(print_r($end_data, true));
+					error_log('0-0----');
+				}
+
+
+			}// end for loop 
+
+
+
+			// check that we have no missing info 
+			if($missing_error){
+				error_log('we are missing files');
+				// fields missing from post return error
+				ResponseHandler::json_response('Error: Missing fields!', 400);
+			}else{
+				error_log('we are not missing any files');
+
+
+				// error_log(print_r($file_rows[0], True));
 			}
-			$this->filter_linked_fields($rows, $first_line,  $_POST['linked_fields'], $file_name);
 
 		}else{
-			// remove the file from the system 
-			$this->unlink_file($_POST['server_file_path'], '../uploads/');
-			// fields missing from post return error
-			ResponseHandler::json_response('Error: Missing fields', 400);
+			error_log('we dont have linked fields');
 		}
+
+
+		// // check for file path && linked fields 
+		// if($_POST['linked_fields'] && $_POST['server_file_path']){
+			// $file_name = $_POST['server_file_path'];
+			// $target_dir = "../uploads/";
+			// $file_path = $target_dir.$file_name;
+			// //Open the file.
+			// $fileHandle = fopen($file_path, "r");
+
+
+			// // open our csv andparse the first line
+			// $f = fopen($file_path, 'r');
+			// $line = fgets($f);
+			// fclose($f);
+			// //push the lines into an array
+			// $first_line = explode(",", $line);
+
+
+			// $rows = array();
+			// //Loop through the CSV rows.
+			// while (($row = fgetcsv($fileHandle, 0, ",")) !== FALSE) {
+			// 	// push all the rows into the array 
+			//     array_push($rows, $row);
+			// }
+		// 	$this->filter_linked_fields($rows, $first_line,  $_POST['linked_fields'], $file_name);
+
+		// }else{
+		// 	// remove the file from the system 
+		// 	$this->unlink_file($_POST['server_file_path'], '../uploads/');
+			// // fields missing from post return error
+			// ResponseHandler::json_response('Error: Missing fields', 400);
+		// }
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	/*

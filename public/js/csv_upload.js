@@ -10,6 +10,7 @@
 		file_input: $('#csv_file_input'),
 		card_widget_container: $('.card_widget_container'),
 		home_drop_zone: $('#drop_zone'),
+ 
 
 		files_array: [],
 		files_view_list: $('.files_view_list'),
@@ -508,6 +509,9 @@
 				// create our post data
 				var post_data = {};
 				post_data.linked_fields = this.link_array;
+
+				log('post data');
+				log(post_data);
 
 
 				// url path 
