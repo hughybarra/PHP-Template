@@ -334,6 +334,8 @@
 			});// end file_input register event
 		},// end home handler 
 
+
+
 		/*
 		* set_error
 		* @param errorMessage STring
@@ -351,7 +353,8 @@
 
 			// check if we have additional data 
 			if(data){
-
+				log('we had data');
+				log(data);
 				//loop over the strings in the array 
 				for(var x =0; x < data.length; x ++){
 
@@ -366,7 +369,7 @@
 			this.state_handler('widget_error');
 		},// end set_error
 
-
+		counter: 0,
 		/*
 		* build_user_field_li
 		* @param String fieldname
@@ -374,6 +377,7 @@
 		*/
 		build_user_field_li: function(field_name, file_name){
 			var newLi = '<li id="'+field_name+'" filename="'+file_name.csv_file+'" class="list-group-item" draggable="true" ondragstart="matching_field_drag(event)">'+ field_name+'</li>';
+			
 			return newLi;
 		},// end build_user_field_li
 
@@ -407,7 +411,6 @@
 	        	'</div>'+
 	    	'</li>';
 	    	return inject_li;
-
 		},//end build_fl_fields
 
 		/*
@@ -529,11 +532,14 @@
 				    	self.state_handler('widget_success');
 				    },
 				    error: function(err, data) {
+				    	log(data);
+				    	log(err);
 				    	// check for json response
 				    	if(err.responseJSON){
 				    		// check fordata in json
 				    		if(err.responseJSON.data){
 				    			self.set_error(err.responseJSON.message, event, err.responseJSON.data);
+
 				    		}
 				    		self.set_error(err.responseJSON.message, event);
 				    	}else{

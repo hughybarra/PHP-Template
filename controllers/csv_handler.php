@@ -52,111 +52,106 @@ class Uploads{
 
 	/*
 	* store_linked_fields
-	* @param query_data array 
-	* attempts to store the fields in the database 
+	* @param query_data object array 
+	* Left off right here  
 	*/
-	public function store_linked_fields($query_data, $file_name)
+	public function store_linked_fields($query_data = NULL)
 	{
-		error_log("THIS SHOULD BE WORKING");
 
-		// validate each and every line 
-		// call store link
+		error_log(print_r($query_data, TRUE));
+
+		/*
+		* @DAVID 
+		* at this point you now have access to the final query data array 
+		* the array is formatted as such 
+		* 
+		* $product = array(
+		* 	'user_field' => someStringNameTheUserProvidedForHisFile, 
+		*	'row' => timmy,
+		*	'fl_field' => strCust_ShippingFirstName, 
+		* );
+		* 
+		* at this point you would loop over this object and extract the FL_FIELD and the ROW 
+		* and then store them in the database. 
+		*/
 
 
-
-		// $s = "insert into dbFleshlight.tblOrders set ";
-
-
-		// foreach($fl_ields as $key => $val){
-		// 	$s .= $key."='".$myArray['key'] // foreignSystemOrderID
-		// }
-
-
-		// remove the file from the system 
-		$this->unlink_file($file_name, '../uploads/');
-		// loop here 
+		// return working response 
 		ResponseHandler::json_response('Working', 200);
-
 	}
 
 	/*
-	* filter_linked_fields
-	* @param $csv_rows array
-	* @param $linked_fields array
-	* loopsover the $csv_rows and attempts to grab the columns matched by the linked_fields array
+	* process_filtered_fields
 	*/
-	public function filter_linked_fields($csv_rows = null, $csv_first_row, $linked_fields = null, $file_name = null )
+	public function process_filtered_fields($process_array = null)
 	{
-		// remove first index from csv rows 
-		unset($csv_rows[0]);
 
 		$query_data = array();
 		$errors_array = array();
 		$error_flag = false;
 
-		// lopo over linked fields and start processing the csv
-		foreach ($linked_fields as &$link) 
-		{
-			// csv_first_row counter
-			$csv_first_row_index = 0; 
+		// loop over our processed data 
+		foreach($process_array as $process_array_item){
+			// unset the first index from csv rows 
+			unset($process_array_item['rows'][0]);
 
-			// loop overeach $csv_first_row and find a match to our linked_fields
-			foreach($csv_first_row as &$row)
+			// loop over linked fields and start processing the csv
+			foreach ($process_array_item['linked_fields'] as &$link) 
 			{
-				$csv_first_row_index ++;
-				// check if we have a matching row and link name 
-				if($row === $link['user_field']){
-					$query_data[$link['user_field']] = array();
-					break;
-				}//end row user_field chck 
-			}// end $csv_first_row as row
+				// csv_first_row counter
+				$csv_first_row_index = 0; 
 
-			// now that we have our index lets grab the data from our csv and stor it into some sort of sexy value 
-			// $csv_first_row_index
-			for ($i = 1; $i <= sizeof($csv_rows); $i++) {
-				// check that our row has data
-				if($csv_rows[$i][$csv_first_row_index -1] === '' ){
-					// row is missing data 
-					$error_flag = true;
-					// push row nameinto error array 
-					array_push($errors_array, $link['user_field']);
-				}
-				// push field into query data array 
-				array_push($query_data[$link['user_field']], $csv_rows[$i][$csv_first_row_index -1]);
-			}// end $csv_rows_length loop 
-		}// nd $linked_fields as link 
-		unset($link);
-		unset($row);
+				// loop overeach $csv_first_row and find a match to our linked_fields
+				// break the array when we have a match to get the index 
+				foreach($process_array_item['first_line'] as &$row)
+				{
+					// increment the counter 
+					$csv_first_row_index ++;
+					// check if we have a matching row and link name break the loop 
+					if($row === $link['user_field']){
+						break;
+					}//end row user_field chck 
+				}// end $csv_first_row as row
+
+				// now that we have our index lets grab the data from our csv and stor it into some sort of sexy value 
+				for ($i = 1; $i <= sizeof($process_array_item['rows']); $i++) {
+					// check that our row has data
+					if($process_array_item['rows'][$i][$csv_first_row_index -1] === '' ){
+						// row is missing data 
+						$error_flag = true;
+						// push row nameinto error array 
+						array_push($errors_array, $link['user_field']);
+					}else{
+						$product = array(
+							'user_field' => $link['user_field'], 
+							'row' => $process_array_item['rows'][$i][$csv_first_row_index -1], 
+							'fl_field' => $link['fl_field'], 
+						);
+						// push the finished product into the query array 
+						array_push($query_data, $product);
+
+						// push field into query data array 
+						// array_push($query_data[$link['user_field']], $process_array_item['rows'][$i][$csv_first_row_index -1]);						
+					}
+
+				}// end $csv_rows_length loop 
+			}// nd $linked_fields as link 
+			unset($link);
+			unset($row);
+		}// end process array loop 
 
 
-
-		// check if we have any errors
+		// check for errors 
 		if($error_flag){
-			return $query_data;
-			// // remove the file from the system 
-			// $this->unlink_file($file_name, '../uploads/');
 			// // remove dupes 
-			// $response_error_array = array_unique($errors_array);
-			// ResponseHandler::json_response('Error: CSV fields cannot be empty', 400, $response_error_array);				
+			$response_error_array = array_values(array_unique($errors_array));
+			ResponseHandler::json_response('Empty values found in csv', 400, $response_error_array);
+
 		}else{
-			error_log('error looping over row stuff');
-			return false;
-			// $this->store_linked_fields($query_data, $file_name);
+			// now that we have all our data we can store our linked fields
+			$this->store_linked_fields($query_data);
 		}
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	/*
 	* load_linked_fields
@@ -169,57 +164,33 @@ class Uploads{
 	*/
 	public function load_linked_fields()
 	{
-
-		/*
-		* fl field 
-		* user field 
-		* file field 
-		*/
-
 		// check for files 
 		if($_POST['linked_fields']){
-			// we have linked fields 
-			error_log('we got linked fields');
-
 			// loop over all of our linked fields 
-			// determine number of files in our upload 
 			$iter = sizeof($_POST['linked_fields']);
-
-
-			error_log(print_r($_POST['linked_fields'], TRUE));
 
 			$missing_error = false;
 
 			$file_rows = array();
 
+			$process_array = array();
+
 			// check for proper file types 
 			for($x = 0; $x < $iter; $x ++){
-
-
-
-				error_log('looping');
-
-
-				error_log(print_r($_POST['linked_fields'][$x]['fl_field'], TRUE));
 
 				$missing_fields = false;
 
 				// check for fl field
 				if (isset($_POST['linked_fields'][$x]['fl_field'])) {
-
 				    $fl_field = $_POST['linked_fields'][$x]['fl_field'];
 				}else{
-					error_log('fl field');
 					$missing_fields = true; 
 				}
-
-				// check for user field 
 
 				// check for user_field 
 				if( isset($_POST['linked_fields'][$x]['user_field'])){
 					$user_field = $_POST['linked_fields'][$x]['user_field'];
 				}else{
-					error_log('user field');
 					$missing_fields = true; 
 				}
 
@@ -227,14 +198,10 @@ class Uploads{
 				if(isset($_POST['linked_fields'][$x]['file_name'])){
 					$file_name = $_POST['linked_fields'][$x]['file_name'];
 				}else{
-					error_log('file name');
 					$missing_fields = true; 
 				}
 
-
-
 				if($missing_fields){
-					error_log('missing fields kick back an error');
 					$missing_error = true;
 					break; 	
 				}
@@ -246,7 +213,6 @@ class Uploads{
 					$file_path = $target_dir.$file_name;
 					//Open the file.
 					$fileHandle = fopen($file_path, "r");
-
 
 					// open our csv andparse the first line
 					$f = fopen($file_path, 'r');
@@ -261,84 +227,33 @@ class Uploads{
 						// push all the rows into the array 
 					    array_push($rows, $row);
 					}
-					// push rows into our file_rows array 
-					array_push($file_rows, $rows);
 
-					$end_data = $this->filter_linked_fields($rows, $first_line,  $_POST['linked_fields'], $file_name);
+					// create new process object to send to the next function
+					$process_obj = array(
+						'rows' => $rows, 
+						'first_line' => $first_line, 
+						'linked_fields' => $_POST['linked_fields'], 
+						'file_name' => $file_name,
+					);
 
-					error_log(print_r($end_data, true));
-					error_log('0-0----');
+					// pussh obj into process array 
+					array_push($process_array, $process_obj);
 				}
-
-
 			}// end for loop 
-
-
 
 			// check that we have no missing info 
 			if($missing_error){
-				error_log('we are missing files');
 				// fields missing from post return error
 				ResponseHandler::json_response('Error: Missing fields!', 400);
 			}else{
-				error_log('we are not missing any files');
-
-
-				// error_log(print_r($file_rows[0], True));
+				// call our process filtered fields method 
+				$this->process_filtered_fields($process_array);
 			}
 
 		}else{
-			error_log('we dont have linked fields');
+			ResponseHandler::json_response('Error: Missing linked fields', 400);
 		}
-
-
-		// // check for file path && linked fields 
-		// if($_POST['linked_fields'] && $_POST['server_file_path']){
-			// $file_name = $_POST['server_file_path'];
-			// $target_dir = "../uploads/";
-			// $file_path = $target_dir.$file_name;
-			// //Open the file.
-			// $fileHandle = fopen($file_path, "r");
-
-
-			// // open our csv andparse the first line
-			// $f = fopen($file_path, 'r');
-			// $line = fgets($f);
-			// fclose($f);
-			// //push the lines into an array
-			// $first_line = explode(",", $line);
-
-
-			// $rows = array();
-			// //Loop through the CSV rows.
-			// while (($row = fgetcsv($fileHandle, 0, ",")) !== FALSE) {
-			// 	// push all the rows into the array 
-			//     array_push($rows, $row);
-			// }
-		// 	$this->filter_linked_fields($rows, $first_line,  $_POST['linked_fields'], $file_name);
-
-		// }else{
-		// 	// remove the file from the system 
-		// 	$this->unlink_file($_POST['server_file_path'], '../uploads/');
-			// // fields missing from post return error
-			// ResponseHandler::json_response('Error: Missing fields', 400);
-		// }
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	/*
 	* read_csv_files
@@ -381,6 +296,7 @@ class Uploads{
 			// finished exploding the lines out of each file 
 
 			// list of required fields for the system 
+			// add to this list, or uncomment to increase the FL fields in the widget 
 			$fl_fields = array(
 				'intOrder_AffID', 
 				'strCust_ShippingCompany',
@@ -402,48 +318,9 @@ class Uploads{
 			);
 			ResponseHandler::json_response('Success: File/Files Uploaded Successfully', 200, $response_array);
 		}else{
-			error_log('missing file array');
 			ResponseHandler::json_response('Server Error: Missing File Array', 400);
 		}
 	}// end read_csv_files
-
-	/*
-	* read_csv_file
-	*/
-	// public function read_csv_file($filePath = '', $fileName = ''){
-
-	// 	// open our csv andparse the first line
-	// 	$f = fopen($filePath, 'r');
-	// 	$line = fgets($f);
-	// 	fclose($f);
-	// 	//push the lines into an array
-	// 	$lines = explode(",", $line);
-
-	// 	$user_fields = $lines;
-	// 	$csv_file = $fileName;
-	// 	$fl_fields = array(
-	// 		'intOrder_AffID', 
-	// 		'strCust_ShippingCompany',
-	// 		'strCust_ShippingFirstName',
-	// 		// 'strCust_ShippingLastName',
-	// 		// 'strCust_ShippingAddress1',
-	// 		// 'strCust_ShippingAddress2',
-	// 		// 'strCust_ShippingCity',
-	// 		// 'strCust_ShippingState',
-	// 		// 'strCust_ShippingZip',
-	// 		// 'strCust_ShippingCountry',
-	// 		// 'strCust_ShippingPhone',
-	// 		// 'foreignSystemOrderID',
-	// 	);
-	// 	$responseObject = array(
-	// 		'user_fields' => $user_fields,
-	// 		'fl_fields' => $fl_fields, 
-	// 		'csv_file' => $csv_file,
-	// 	);
-
-	// 	ResponseHandler::json_response('Success: File Uploaded Successfully', 200, $responseObject);
-	// }
-
 
 	/*
 	* store_csv
@@ -461,7 +338,6 @@ class Uploads{
 
 			// determine number of files in our upload 
 			$iter = sizeof($_FILES);
-			error_log('iter size: '.$iter);
 
 			$file_flag = 0;
 
@@ -469,24 +345,18 @@ class Uploads{
 			for($x = 0; $x < $iter; $x ++){
 				 // check for correct file types 
 				if($_FILES['csv_file_'.$x]['type'] != 'text/csv'){
-					error_log('incorrect file type');
 					$file_flag = 1;
 					break;	
 				}
 			}// end for loop 
 
-
 			// check our error flag for valid file types 
 			if($file_flag === 1){
 				// if error return the error 
-				error_log('return an error');
 				ResponseHandler::json_response('Error: Uploading file, Only CSV file type allowed', 400);
 				exit;
 			}
 
-			error_log('all good here');
- 		
-			// LEFT OFF HERE 
 			$file_array = array();
  			// loop over all of the files 
  			for($x = 0; $x < $iter; $x ++){
@@ -505,39 +375,13 @@ class Uploads{
 
 				array_push($file_array, $temp_array);
 
-				if(move_uploaded_file($_FILES['csv_file_'.$x]["tmp_name"], $target_file)) {
-					error_log('everything worked');
-				}else{
-					error_log('something went wrong');
+				if(!move_uploaded_file($_FILES['csv_file_'.$x]["tmp_name"], $target_file)) {
 					ResponseHandler::json_response('Error: Uploading file', 400);
 				}
  			}// end for loop 
 
- 			error_log('finished looping');
- 			error_log(print_r($file_array, TRUE));
-
  			// now that we have our files uploaded lets call the parser
  			$this->read_csv_files($file_array);
-
-
- 			// 'csv_file_'+x
-
-
-			// //check for csv fil type 
-			// if($_FILES['csv_file']['type'] === 'text/csv'){
-// /
-
-			// 	$fileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
-
-			//     if (move_uploaded_file($_FILES["csv_file"]["tmp_name"], $target_file)) {
-			//     	$this->read_csv_file($target_file, $file_name);
-			//         // now that we have saved the file lets process it 
-			//     } else {
-			//     	ResponseHandler::json_response('Error: Uploading file', 400);
-			//     }				
-			// }else{
-			// 	ResponseHandler::json_response('Error: Invalid file type', 400);
-			// }// end $_FILES['csv_file']['type']
 		}else{
 			ResponseHandler::json_response('Error: Files missing in upload', 400);
 		}// end $_FILES			
